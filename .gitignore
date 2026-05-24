@@ -1,3 +1,7 @@
 .claude/
 .DS_Store
 Thumbs.db
+screenshot_tool/
+shots/
+*_unpacked/
+reference_text.txt

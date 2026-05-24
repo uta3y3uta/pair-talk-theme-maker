@@ -3,11 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>ペアトークテーマメーカー</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Bungee&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<script>
+  // ローカル開発時のキャッシュ事故防止：JS/CSS にタイムスタンプを差し込んで毎回リロード
+  (function () {
+    const t = Date.now();
+    document.write(
+      '<link rel="stylesheet" href="style.css?t=' + t + '">' +
+      '<script src="themes.js?t=' + t + '"><\/script>' +
+      '<script src="app.js?t=' + t + '"><\/script>'
+    );
+  })();
+</script>
 </head>
 <body>
 
@@ -45,10 +58,10 @@
 
       <div class="publish-area">
         <button id="btnPublish" class="btn btn-mario-green btn-big">完成 → URL発行</button>
-        <div id="publishResult" class="publish-result hidden">
+        <div id="publishResult" class="publish-result">
           <label>発行URL</label>
           <div class="url-row">
-            <input id="publishedUrl" type="text" readonly>
+            <input id="publishedUrl" type="text" readonly placeholder="「完成 → URL発行」を押すとここに表示されます">
             <button id="btnCopy" class="btn btn-mario-blue">コピー</button>
             <button id="btnOpen" class="btn btn-mario-blue">開く</button>
           </div>
@@ -70,6 +83,8 @@
     <!-- 大スロット -->
     <div class="slot-frame play-frame">
       <div id="playSlot" class="play-window"><div class="slot-inner">スタートを<ruby>押<rt>お</rt></ruby>してね</div></div>
+      <!-- 上の初期HTMLはfallback。app.js が描画する内容に置き換わる -->
+
     </div>
 
     <!-- 4ボタン横並び -->
@@ -123,7 +138,5 @@
   </div>
 </template>
 
-<script src="themes.js"></script>
-<script src="app.js"></script>
 </body>
 </html>

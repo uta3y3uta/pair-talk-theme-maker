@@ -1,5 +1,6 @@
 // ===== 状態 =====
-const STORAGE_KEY = 'pairTalkThemeMaker.v2';
+const STORAGE_KEY = 'pairTalkThemeMaker.v4';  // v4：デフォルトテーマ刷新＋編集UX改修
+const LEGACY_KEYS = ['pairTalkThemeMaker.v3', 'pairTalkThemeMaker.v2'];
 const TOTAL_SLOTS = 300;          // 250デフォルト + 50ユーザー
 const CUSTOM_START = 250;         // インデックス 250..299 がユーザー枠
 const PLACEHOLDER = '（クリックして入力）';
@@ -16,6 +17,69 @@ let pausedSec = 0;          // 一時停止中の残り秒数（0なら一時停
 let setMin = 1;   // デフォルト1分
 let setSec = 0;
 let countdownEffectActive = false;  // 3,2,1演出中フラグ
+
+// ===== ルビ記法 =====
+// 保存形式： {漢字|ふりがな}  例：{今日|きょう}
+// HTMLエスケープ → {|} を <ruby><rt> に変換
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+function renderRuby(text) {
+  if (!text) return '';
+  // ① まず全体をHTMLエスケープ（XSS対策）
+  // ② {漢字|かな} を <ruby><rt> に展開
+  return escapeHtml(text).replace(
+    /\{([^{}|]+)\|([^{}|]+)\}/g,
+    '<ruby>$1<rt>$2</rt></ruby>'
+  );
+}
+// 旧形式（<ruby>X<rt>Y</rt></ruby>）→ 新形式（{X|Y}） に変換
+function migrateRubyText(text) {
+  if (!text) return text;
+  if (text.indexOf('<ruby>') === -1) return text;  // 既に新形式
+  return text.replace(
+    /<ruby>([^<]+)<rt>([^<]+)<\/rt><\/ruby>/g,
+    '{$1|$2}'
+  );
+}
+// contenteditable要素のDOMをたどり，{漢字|かな} 形式の文字列に直列化
+// ＝編集後の <ruby>...<rt>...</rt></ruby> を保存用の素朴な記法に戻す
+function serializeRubyDOM(el) {
+  let out = '';
+  el.childNodes.forEach(node => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      out += node.textContent;
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    const tag = node.tagName.toLowerCase();
+    if (tag === 'ruby') {
+      let base = '', rt = '';
+      node.childNodes.forEach(c => {
+        if (c.nodeType === Node.TEXT_NODE) { base += c.textContent; return; }
+        if (c.nodeType !== Node.ELEMENT_NODE) return;
+        const ctag = c.tagName.toLowerCase();
+        if (ctag === 'rt') rt += c.textContent;
+        else if (ctag === 'rp') { /* parens は無視 */ }
+        else base += c.textContent;
+      });
+      base = base.trim();
+      rt = rt.trim();
+      if (base && rt) out += '{' + base + '|' + rt + '}';
+      else out += base;
+    } else if (tag === 'rt' || tag === 'rp') {
+      // 単独で出てきたら無視
+    } else if (tag === 'br') {
+      // 改行は半角スペースに丸める
+      out += ' ';
+    } else {
+      out += serializeRubyDOM(node);
+    }
+  });
+  return out;
+}
 
 // ===== 初期化 =====
 function init() {
@@ -36,7 +100,7 @@ function enterEditorMode() {
   renderThemeList();
   updateCount();
   bindEditorEvents();
-  renderTrialSlot('スタートを押してね');
+  renderTrialSlot('スタートを{押|お}してね');
 }
 
 function buildInitialThemes() {
@@ -49,12 +113,15 @@ function buildInitialThemes() {
 }
 
 function loadThemes() {
+  // 現行キー（v4）があればそのまま使う
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
       const data = JSON.parse(saved);
       if (Array.isArray(data) && data.length > 0) {
-        // 300未満ならパディング
+        data.forEach(t => {
+          if (t && typeof t.text === 'string') t.text = migrateRubyText(t.text);
+        });
         while (data.length < TOTAL_SLOTS) {
           data.push({ text: '', on: false, custom: true });
         }
@@ -62,6 +129,30 @@ function loadThemes() {
       }
     } catch (e) { /* fall through */ }
   }
+
+  // 旧キー（v3/v2）からの初回移行：
+  // デフォルト250は最新のDEFAULT_THEMESで強制刷新し，ユーザーがカスタム枠
+  // （index 250..299）に入れたものだけを引き継ぐ
+  for (const legacyKey of LEGACY_KEYS) {
+    const legacy = localStorage.getItem(legacyKey);
+    if (!legacy) continue;
+    try {
+      const oldData = JSON.parse(legacy);
+      if (!Array.isArray(oldData)) continue;
+      const result = buildInitialThemes();
+      for (let i = CUSTOM_START; i < TOTAL_SLOTS && i < oldData.length; i++) {
+        const src = oldData[i];
+        if (src && typeof src.text === 'string' && src.text) {
+          result[i].text = migrateRubyText(src.text);
+          result[i].on = !!src.on;
+          result[i].custom = true;
+        }
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
+      return result;
+    } catch (e) { /* try next legacy key */ }
+  }
+
   return buildInitialThemes();
 }
 
@@ -98,24 +189,29 @@ function renderThemeList() {
     const txt = row.querySelector('.theme-text');
     setRowText(txt, row, t.text);
 
+    // focus 時：プレースホルダだけ消す。ルビは常に表示したまま編集できる。
     txt.addEventListener('focus', () => {
       if (!themes[i].text) {
         txt.textContent = '';
         row.classList.remove('empty');
       }
     });
+    // blur 時：DOM（編集後の<ruby>を含むHTML）を {漢字|かな} 形式に直列化して保存。
+    // ・ルビはそのまま保持される
+    // ・テキスト中に {漢字|かな} と書けば自動でルビ化されて再描画
     txt.addEventListener('blur', () => {
-      const newText = txt.innerHTML.trim();
-      if (newText) {
-        themes[i].text = newText;
+      let raw = serializeRubyDOM(txt);
+      raw = migrateRubyText(raw).trim();  // ペースト由来の<ruby>HTMLも吸収
+      if (raw) {
+        themes[i].text = raw;
+        txt.innerHTML = renderRuby(raw);  // ルビ表示で再描画
         saveThemes();
         row.classList.remove('empty');
       } else {
         themes[i].text = '';
-        // OFFに戻す
         themes[i].on = false;
         cb.checked = false;
-        row.classList.add('disabled', 'empty');
+        row.classList.add('disabled');
         row.classList.add('empty');
         setRowText(txt, row, '');
         saveThemes();
@@ -138,7 +234,7 @@ function renderThemeList() {
 
 function setRowText(txtEl, row, text) {
   if (text) {
-    txtEl.innerHTML = text;
+    txtEl.innerHTML = renderRuby(text);  // ルビ付き表示
     row.classList.remove('empty');
   } else {
     txtEl.textContent = PLACEHOLDER;
@@ -182,6 +278,7 @@ function bindEditorEvents() {
   document.getElementById('btnPublish').addEventListener('click', publishUrl);
   document.getElementById('btnCopy').addEventListener('click', () => {
     const input = document.getElementById('publishedUrl');
+    if (!input.value) return; // 未発行のときは何もしない
     input.select();
     navigator.clipboard.writeText(input.value).then(() => {
       const btn = document.getElementById('btnCopy');
@@ -192,6 +289,7 @@ function bindEditorEvents() {
   });
   document.getElementById('btnOpen').addEventListener('click', () => {
     const url = document.getElementById('publishedUrl').value;
+    if (!url) return; // 未発行のときは何もしない
     window.open(url, '_blank');
   });
 }
@@ -203,8 +301,12 @@ function activeThemes() {
 
 // flex親に直接テキストとrubyを混ぜると別々のflex itemになって崩れるので
 // 必ず単一の .slot-inner で包む
-function setSlotHTML(windowEl, html) {
-  windowEl.innerHTML = '<div class="slot-inner">' + html + '</div>';
+// 引数 text は {漢字|かな} 形式の保存テキスト（または既に整形済HTMLメッセージ）
+function setSlotHTML(windowEl, text, opts) {
+  opts = opts || {};
+  // raw: true なら HTML をそのまま使う（「スタートを押してね」など固定メッセージ用）
+  const inner = opts.raw ? text : renderRuby(text);
+  windowEl.innerHTML = '<div class="slot-inner">' + inner + '</div>';
 }
 
 // シャッフルバッグ式：seenに無いものから選ぶ。全部出たら自動でリセット
@@ -334,14 +436,15 @@ function enterPlayMode(encoded) {
       list.push(DEFAULT_THEMES[i]);
     }
   }
-  (payload.c || []).forEach(t => list.push(t));
+  // 旧形式の <ruby> を含むカスタムテーマは {|} 形式にマイグレート
+  (payload.c || []).forEach(t => list.push(migrateRubyText(t)));
 
   if (list.length === 0) {
     setSlotHTML(document.getElementById('playSlot'), 'テーマがありません');
     return;
   }
   // 初期表示も .slot-inner で包む
-  setSlotHTML(document.getElementById('playSlot'), 'スタートを<ruby>押<rt>お</rt></ruby>してね');
+  setSlotHTML(document.getElementById('playSlot'), 'スタートを{押|お}してね');
 
   themes = list.map(t => ({ text: t, on: true, custom: false }));
 

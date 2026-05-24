@@ -157,8 +157,14 @@ rt {
   outline: none;
   background: var(--cream);
   font-weight: 700;
+  /* ルビを含んでも編集中の caret 移動を安定させる */
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .theme-text:focus { border-color: var(--blue); background: var(--white); }
+/* 編集中もルビ（rt）はそのまま表示。base/rt どちらも編集可 */
+.theme-text ruby { ruby-position: over; }
+.theme-text rt { font-size: 0.5em; font-weight: 700; }
 .theme-row.custom .theme-num { color: var(--red); font-weight: 900; }
 
 .btn-icon {
@@ -292,9 +298,10 @@ rt {
   padding-top: 14px;
   text-align: center;
 }
-.publish-result { margin-top: 12px; text-align: left; }
-.publish-result label { font-size: 12px; color: var(--gray); }
-.url-row { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+/* 発行URL欄は常に表示（初期は空欄＋プレースホルダー） */
+.publish-result { margin-top: 12px; text-align: left; display: block !important; }
+.publish-result label { font-size: 12px; color: var(--gray); display: block; }
+.url-row { display: flex !important; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
 .url-row input {
   flex: 1; min-width: 200px;
   padding: 8px 10px; font-size: 12px;
@@ -409,7 +416,8 @@ rt {
   text-shadow: 4px 4px 0 rgba(0,0,0,0.18);
 }
 .arrow {
-  width: 50px; height: 28px;
+  position: relative;
+  width: 58px; height: 34px;
   border: 3px solid var(--black);
   background: var(--yellow);
   border-radius: 8px;
@@ -422,10 +430,20 @@ rt {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s;
-  margin: 2px 0;
+  margin: 4px 0;
   padding: 0;
   font-family: inherit;
 }
+/* 見た目のサイズは控えめのまま，タッチ判定だけを外側に大きく広げる */
+.arrow::before {
+  content: "";
+  position: absolute;
+  inset: -22px -34px;
+  /* z-index で他要素より上にして，端っこのクリックも確実に拾う */
+  z-index: 2;
+}
+/* 矢印自身も明示的に z-index を持たせて，重なり判定を安定化 */
+.arrow { z-index: 1; }
 .arrow:active {
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0 var(--black);
@@ -469,7 +487,7 @@ rt {
 @media (max-width: 700px) {
   .time-num { font-size: 64px; min-width: 90px; }
   .time-colon { font-size: 52px; }
-  .arrow { width: 40px; height: 24px; font-size: 16px; }
+  .arrow { width: 48px; height: 30px; font-size: 16px; }
   .mario-title { font-size: 26px; }
 }
 
