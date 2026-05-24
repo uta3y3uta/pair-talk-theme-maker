@@ -245,13 +245,33 @@ rt {
   min-height: 130px;
   display: flex; align-items: center; justify-content: center;
   font-size: 22px;
-  line-height: 2.6;
+  line-height: 2.0;
   text-align: center;
-  padding: 18px 22px;
-  word-break: break-word;
+  padding: 22px 22px 14px;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
-.slot-window ruby { ruby-position: over; line-height: 1; }
-.slot-window ruby rt { line-height: 1.2; font-size: 0.5em; }
+/* ルビは絶対配置にして行高に影響させない */
+.slot-window ruby {
+  display: inline-block;
+  position: relative;
+  vertical-align: baseline;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+}
+.slot-window ruby rt {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 1px;
+  font-size: 0.45em;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--black);
+  white-space: nowrap;
+}
 
 /* スピン中：ルビ非表示・１行強制・崩れ防止 */
 .slot-window.spinning {
@@ -314,20 +334,32 @@ rt {
   min-height: 220px;
   display: flex; align-items: center; justify-content: center;
   text-align: center;
-  padding: 28px 28px 24px;
-  font-size: 34px;
-  line-height: 2.6;
-  word-break: break-word;
+  padding: 36px 28px 24px;
+  font-size: 32px;
+  line-height: 2.0;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
+/* ルビは絶対配置にして本文の行高に影響させない */
 .play-window ruby {
-  ruby-position: over;
+  display: inline-block;
+  position: relative;
+  vertical-align: baseline;
   line-height: 1;
+  padding: 0;
+  margin: 0;
 }
 .play-window ruby rt {
-  font-size: 0.45em;
-  line-height: 1.1;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 2px;
+  font-size: 0.4em;
+  line-height: 1;
   font-weight: 700;
   color: var(--black);
+  white-space: nowrap;
 }
 .play-window.spinning {
   white-space: nowrap; overflow: hidden;
@@ -340,7 +372,7 @@ rt {
 .play-window.landed { animation: slot-pop 0.5s ease; }
 
 @media (max-width: 700px) {
-  .play-window { font-size: 22px; min-height: 150px; padding: 18px 14px 14px; line-height: 2.4; }
+  .play-window { font-size: 22px; min-height: 150px; padding: 26px 14px 14px; line-height: 2.0; }
   .play-window.spinning { font-size: 18px; }
 }
 
