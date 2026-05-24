@@ -139,26 +139,48 @@ rt {
   border-bottom: 1px dashed #cfcfcf;
 }
 .theme-row:last-child { border-bottom: none; }
-.theme-row.disabled .theme-body,
-.theme-row.disabled .theme-ruby { opacity: 0.55; }
-.theme-row.disabled .theme-body { text-decoration: line-through; }
+.theme-row.disabled .theme-display { opacity: 0.55; text-decoration: line-through; }
+.theme-row.empty .theme-display { color: #bbb; font-style: italic; }
+.theme-row.empty.disabled .theme-display { text-decoration: none; opacity: 0.7; }
 
 .theme-num {
   font-size: 12px; color: var(--gray);
   text-align: right; font-variant-numeric: tabular-nums;
 }
 
-/* 本文＋ルビ の2段入力 */
+/* テキスト領域：通常は theme-display だけ。編集中だけ body+ruby が出る */
 .theme-fields {
   display: flex; flex-direction: column; gap: 3px;
   min-width: 0;  /* gridセル内でinputが溢れないように */
 }
-.theme-body, .theme-ruby {
-  width: 100%;
+
+/* 通常表示（ルビ付きHTMLをそのまま見せる） */
+.theme-display {
+  padding: 6px 10px;
   border: 2px solid transparent;
   border-radius: 8px;
-  outline: none;
   background: var(--cream);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 2.1;
+  min-height: 1.5em;
+  cursor: text;
+  outline: none;
+  word-break: break-word;
+}
+.theme-display:hover  { border-color: #e4d8a8; }
+.theme-display:focus  { border-color: var(--blue); }
+.theme-display ruby   { ruby-position: over; }
+.theme-display rt     { font-size: 0.5em; font-weight: 700; }
+
+/* 編集用 input は普段は非表示 */
+.theme-body, .theme-ruby {
+  display: none;
+  width: 100%;
+  border: 2px solid var(--blue);
+  border-radius: 8px;
+  outline: none;
+  background: var(--white);
   font-family: inherit;
   box-sizing: border-box;
 }
@@ -172,13 +194,18 @@ rt {
   padding: 4px 10px;
   font-size: 11px;
   font-weight: 500;
-  color: #777;
+  color: #555;
   background: #fff8e7;
+  border-color: #e0c878;
 }
 .theme-body::placeholder { color: #bbb; font-weight: 500; font-style: italic; }
-.theme-ruby::placeholder { color: #c8b890; font-style: italic; }
-.theme-body:focus { border-color: var(--blue); background: var(--white); }
-.theme-ruby:focus { border-color: var(--blue); background: var(--white); color: var(--black); }
+.theme-ruby::placeholder { color: #b89858; font-style: italic; }
+
+/* 編集モード：display を隠し，input を出す */
+.theme-row.editing .theme-display { display: none; }
+.theme-row.editing .theme-body,
+.theme-row.editing .theme-ruby   { display: block; }
+
 .theme-row.custom .theme-num { color: var(--red); font-weight: 900; }
 
 .btn-icon {

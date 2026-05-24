@@ -235,14 +235,37 @@ function renderThemeList() {
 
     row.querySelector('.theme-num').textContent = (i + 1).toString();
 
+    const display   = row.querySelector('.theme-display');
     const bodyInput = row.querySelector('.theme-body');
     const rubyInput = row.querySelector('.theme-ruby');
-    const fields = splitRubyFields(t.text);
-    bodyInput.value = fields.body;
-    rubyInput.value = fields.ruby;
+    const fieldsEl  = row.querySelector('.theme-fields');
 
-    // 本文 or ルビが書き換わったら結合して保存。空になったらOFFに。
-    const commit = () => {
+    // 通常表示（ルビ付きHTML）を描画
+    function paintDisplay() {
+      const text = themes[i].text || '';
+      if (text) {
+        display.innerHTML = renderRuby(text);
+        row.classList.remove('empty');
+      } else {
+        display.textContent = '（クリックして入力）';
+        row.classList.add('empty');
+      }
+    }
+    paintDisplay();
+
+    // 編集モードに入る：本文＋ルビの2段に展開してフォーカス
+    function openEdit(focusRuby) {
+      const parts = splitRubyFields(themes[i].text || '');
+      bodyInput.value = parts.body;
+      rubyInput.value = parts.ruby;
+      row.classList.add('editing');
+      const target = focusRuby ? rubyInput : bodyInput;
+      // 表示が display:none → block に切り替わってからフォーカス
+      requestAnimationFrame(() => { target.focus(); target.select(); });
+    }
+
+    // 編集モードを閉じる（保存）
+    function closeEdit() {
       const body = bodyInput.value.trim();
       const ruby = rubyInput.value.trim();
       const combined = combineRubyFields(body, ruby);
@@ -259,11 +282,37 @@ function renderThemeList() {
         saveThemes();
         updateCount();
       }
-    };
-    bodyInput.addEventListener('change', commit);
-    rubyInput.addEventListener('change', commit);
-    // 入力中もリアルタイムでプレビュー側に反映したい場合は input でも commit
-    bodyInput.addEventListener('input', () => { row.classList.toggle('empty', !bodyInput.value.trim()); });
+      row.classList.remove('editing');
+      paintDisplay();
+    }
+
+    // displayをクリック or フォーカスで編集モード
+    display.addEventListener('click', () => openEdit(false));
+    display.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openEdit(false); }
+    });
+
+    // 2つの input いずれからも焦点が外れたら閉じる（focusoutはbubblingする）
+    fieldsEl.addEventListener('focusout', (e) => {
+      const next = e.relatedTarget;
+      if (next && fieldsEl.contains(next)) return; // body⇄ruby間の移動は閉じない
+      closeEdit();
+    });
+
+    // Enterで決定，Escapeでキャンセル（編集前の値に戻して閉じる）
+    [bodyInput, rubyInput].forEach(inp => {
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); inp.blur(); }
+        else if (e.key === 'Escape') {
+          e.preventDefault();
+          // 値を巻き戻してから閉じる（保存ロジックが現在値を読む前に）
+          const parts = splitRubyFields(themes[i].text || '');
+          bodyInput.value = parts.body;
+          rubyInput.value = parts.ruby;
+          inp.blur();
+        }
+      });
+    });
 
     row.querySelector('.theme-clear').addEventListener('click', () => {
       if (confirm('このテーマをクリアしますか？（スロット枠は残ります）')) {

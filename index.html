@@ -134,8 +134,11 @@
     </label>
     <div class="theme-num"></div>
     <div class="theme-fields">
-      <input type="text" class="theme-body" placeholder="本文（例：好きな給食のメニューは？）" spellcheck="false">
-      <input type="text" class="theme-ruby" placeholder="ルビ（例：好=す，給食=きゅうしょく）" spellcheck="false">
+      <!-- 通常はこれだけ表示（ルビ付き） -->
+      <div class="theme-display" tabindex="0" role="button" aria-label="編集"></div>
+      <!-- タップで展開 -->
+      <input type="text" class="theme-body" placeholder="本文" spellcheck="false">
+      <input type="text" class="theme-ruby" placeholder="ルビ　例：好=す，給食=きゅうしょく" spellcheck="false">
     </div>
     <button class="btn-icon theme-clear" title="クリア">×</button>
   </div>
