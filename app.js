@@ -194,10 +194,16 @@ function activeThemes() {
   return themes.filter(t => t.on && t.text);
 }
 
+// flex親に直接テキストとrubyを混ぜると別々のflex itemになって崩れるので
+// 必ず単一の .slot-inner で包む
+function setSlotHTML(windowEl, html) {
+  windowEl.innerHTML = '<div class="slot-inner">' + html + '</div>';
+}
+
 function spinSlot(windowEl, prevIndex, btn, onLand) {
   const pool = activeThemes();
   if (pool.length === 0) {
-    windowEl.innerHTML = 'ONのテーマがありません';
+    setSlotHTML(windowEl, 'ONのテーマがありません');
     return prevIndex;
   }
   const eligible = (pool.length > 1 && prevIndex >= 0)
@@ -212,13 +218,13 @@ function spinSlot(windowEl, prevIndex, btn, onLand) {
 
   const spinInterval = setInterval(() => {
     const r = Math.floor(Math.random() * pool.length);
-    windowEl.innerHTML = pool[r].text;
+    setSlotHTML(windowEl, pool[r].text);
   }, 60);
 
   setTimeout(() => {
     clearInterval(spinInterval);
     windowEl.classList.remove('spinning');
-    windowEl.innerHTML = pool[finalIdx].text;
+    setSlotHTML(windowEl, pool[finalIdx].text);
     windowEl.classList.add('landed');
     if (btn) btn.disabled = false;
     if (onLand) onLand(finalIdx);
@@ -228,7 +234,7 @@ function spinSlot(windowEl, prevIndex, btn, onLand) {
 }
 
 function renderTrialSlot(msg) {
-  document.getElementById('trialSlot').innerHTML = msg;
+  setSlotHTML(document.getElementById('trialSlot'), msg);
 }
 
 function spinTrial() {
@@ -298,7 +304,7 @@ function enterPlayMode(encoded) {
   try {
     payload = JSON.parse(decodeURIComponent(encoded));
   } catch (e) {
-    document.getElementById('playSlot').innerHTML = 'URLが正しくありません';
+    setSlotHTML(document.getElementById('playSlot'), 'URLが正しくありません');
     return;
   }
 
@@ -312,9 +318,11 @@ function enterPlayMode(encoded) {
   (payload.c || []).forEach(t => list.push(t));
 
   if (list.length === 0) {
-    document.getElementById('playSlot').innerHTML = 'テーマがありません';
+    setSlotHTML(document.getElementById('playSlot'), 'テーマがありません');
     return;
   }
+  // 初期表示も .slot-inner で包む
+  setSlotHTML(document.getElementById('playSlot'), 'スタートを<ruby>押<rt>お</rt></ruby>してね');
 
   themes = list.map(t => ({ text: t, on: true, custom: false }));
 

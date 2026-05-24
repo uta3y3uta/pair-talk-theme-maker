@@ -244,10 +244,13 @@ rt {
 .slot-window {
   min-height: 130px;
   display: flex; align-items: center; justify-content: center;
+  padding: 22px 22px 14px;
+}
+.slot-window .slot-inner {
+  width: 100%;
+  text-align: center;
   font-size: 22px;
   line-height: 2.0;
-  text-align: center;
-  padding: 22px 22px 14px;
   overflow-wrap: anywhere;
   word-break: normal;
 }
@@ -274,7 +277,7 @@ rt {
 }
 
 /* スピン中：ルビ非表示・１行強制・崩れ防止 */
-.slot-window.spinning {
+.slot-window.spinning .slot-inner {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: clip;
@@ -333,8 +336,11 @@ rt {
 .play-window {
   min-height: 220px;
   display: flex; align-items: center; justify-content: center;
-  text-align: center;
   padding: 36px 28px 24px;
+}
+.play-window .slot-inner {
+  width: 100%;
+  text-align: center;
   font-size: 32px;
   line-height: 2.0;
   overflow-wrap: anywhere;
@@ -361,7 +367,7 @@ rt {
   color: var(--black);
   white-space: nowrap;
 }
-.play-window.spinning {
+.play-window.spinning .slot-inner {
   white-space: nowrap; overflow: hidden;
   animation: slot-flash 0.08s linear infinite;
   filter: blur(0.6px);
@@ -372,8 +378,9 @@ rt {
 .play-window.landed { animation: slot-pop 0.5s ease; }
 
 @media (max-width: 700px) {
-  .play-window { font-size: 22px; min-height: 150px; padding: 26px 14px 14px; line-height: 2.0; }
-  .play-window.spinning { font-size: 18px; }
+  .play-window { min-height: 150px; padding: 26px 14px 14px; }
+  .play-window .slot-inner { font-size: 22px; line-height: 2.0; }
+  .play-window.spinning .slot-inner { font-size: 18px; }
 }
 
 /* 3ボタン横並び */
