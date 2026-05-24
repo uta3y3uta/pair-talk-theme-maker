@@ -5,12 +5,16 @@ const CUSTOM_START = 250;         // インデックス 250..299 がユーザー
 const PLACEHOLDER = '（クリックして入力）';
 
 let themes = [];
-let trialPrevIndex = -1;
-let playPrevIndex = -1;
+// シャッフルバッグ：表示済みテキストを記録（全部出たら自動リセット）
+let trialSeen = new Set();
+let playSeen = new Set();
+let trialLastText = '';
+let playLastText = '';
 let countdownTimer = null;
 let remainingSec = 0;
 let setMin = 1;   // デフォルト1分
 let setSec = 0;
+let countdownEffectActive = false;  // 3,2,1演出中フラグ
 
 // ===== 初期化 =====
 function init() {
@@ -163,6 +167,8 @@ function bindEditorEvents() {
     if (confirm('全てデフォルトに戻します。オリジナル枠の入力も消えますがよいですか？')) {
       localStorage.removeItem(STORAGE_KEY);
       themes = loadThemes();
+      trialSeen.clear();
+      trialLastText = '';
       renderThemeList();
       updateCount();
     }
@@ -200,17 +206,28 @@ function setSlotHTML(windowEl, html) {
   windowEl.innerHTML = '<div class="slot-inner">' + html + '</div>';
 }
 
-function spinSlot(windowEl, prevIndex, btn, onLand) {
+// シャッフルバッグ式：seenに無いものから選ぶ。全部出たら自動でリセット
+// （直前に出たものは除外したまま継続）。返り値は今回ランドしたtext。
+function spinSlot(windowEl, seenSet, lastText, btn, onLand, opts) {
+  opts = opts || {};
   const pool = activeThemes();
   if (pool.length === 0) {
     setSlotHTML(windowEl, 'ONのテーマがありません');
-    return prevIndex;
+    return lastText;
   }
-  const eligible = (pool.length > 1 && prevIndex >= 0)
-    ? pool.map((_, i) => i).filter(i => i !== prevIndex)
-    : pool.map((_, i) => i);
 
-  const finalIdx = eligible[Math.floor(Math.random() * eligible.length)];
+  // 候補：まだ見ていないもの
+  let eligible = pool.filter(t => !seenSet.has(t.text));
+  if (eligible.length === 0) {
+    // 全部出尽くしたのでリセット。直前だけは弾く
+    seenSet.clear();
+    if (lastText) seenSet.add(lastText);
+    eligible = pool.filter(t => !seenSet.has(t.text));
+    if (eligible.length === 0) eligible = pool;  // poolが1つしか無いケース
+  }
+
+  const picked = eligible[Math.floor(Math.random() * eligible.length)];
+  seenSet.add(picked.text);
 
   if (btn) btn.disabled = true;
   windowEl.classList.add('spinning');
@@ -224,13 +241,13 @@ function spinSlot(windowEl, prevIndex, btn, onLand) {
   setTimeout(() => {
     clearInterval(spinInterval);
     windowEl.classList.remove('spinning');
-    setSlotHTML(windowEl, pool[finalIdx].text);
+    setSlotHTML(windowEl, picked.text);
     windowEl.classList.add('landed');
-    if (btn) btn.disabled = false;
-    if (onLand) onLand(finalIdx);
+    if (btn && !opts.keepDisabled) btn.disabled = false;
+    if (onLand) onLand(picked);
   }, 1400);
 
-  return finalIdx;
+  return picked.text;
 }
 
 function renderTrialSlot(msg) {
@@ -239,9 +256,10 @@ function renderTrialSlot(msg) {
 
 function spinTrial() {
   const btn = document.getElementById('trialBtn');
-  trialPrevIndex = spinSlot(
+  trialLastText = spinSlot(
     document.getElementById('trialSlot'),
-    trialPrevIndex,
+    trialSeen,
+    trialLastText,
     btn
   );
 }
@@ -332,22 +350,43 @@ function enterPlayMode(encoded) {
 
 function bindPlayEvents() {
   document.getElementById('playSlotBtn').addEventListener('click', () => {
+    // スピン中／演出中の連打を完全ガード
+    if (countdownEffectActive) return;
     const btn = document.getElementById('playSlotBtn');
+    if (btn.disabled) return;
+    const restartBtn = document.getElementById('btnTimerRestart');
     stopCountdown();
-    playPrevIndex = spinSlot(
+    restartBtn.disabled = true;
+    playLastText = spinSlot(
       document.getElementById('playSlot'),
-      playPrevIndex,
+      playSeen,
+      playLastText,
       btn,
       () => {
-        runStartCountdownEffect(() => startCountdown());
-      }
+        runStartCountdownEffect(() => {
+          startCountdown();
+          btn.disabled = false;
+          restartBtn.disabled = false;
+        });
+      },
+      { keepDisabled: true }   // 演出が終わるまでボタンを離さない
     );
   });
 
   // リスタート：タイマーだけを開始（スロットは回さない）
   document.getElementById('btnTimerRestart').addEventListener('click', () => {
+    if (countdownEffectActive) return;
+    const slotBtn = document.getElementById('playSlotBtn');
+    const restartBtn = document.getElementById('btnTimerRestart');
+    if (restartBtn.disabled) return;
     stopCountdown();
-    runStartCountdownEffect(() => startCountdown());
+    slotBtn.disabled = true;
+    restartBtn.disabled = true;
+    runStartCountdownEffect(() => {
+      startCountdown();
+      slotBtn.disabled = false;
+      restartBtn.disabled = false;
+    });
   });
 
   document.querySelectorAll('.arrow').forEach(btn => {
@@ -406,6 +445,8 @@ function renderTimerDisplay() {
 function runStartCountdownEffect(onDone) {
   const overlay = document.getElementById('countdownOverlay');
   if (!overlay) { if (onDone) onDone(); return; }
+  if (countdownEffectActive) { return; }   // 二重起動禁止
+  countdownEffectActive = true;
 
   const steps = ['3', '2', '1', 'スタート！'];
   const stepMs = 800;
@@ -420,6 +461,7 @@ function runStartCountdownEffect(onDone) {
     if (i >= steps.length) {
       overlay.classList.add('hidden');
       if (currentEl) currentEl.className = 'countdown-text';
+      countdownEffectActive = false;
       if (onDone) onDone();
       return;
     }
