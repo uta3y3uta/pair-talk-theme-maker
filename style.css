@@ -139,32 +139,46 @@ rt {
   border-bottom: 1px dashed #cfcfcf;
 }
 .theme-row:last-child { border-bottom: none; }
-.theme-row.disabled .theme-text { opacity: 0.55; text-decoration: line-through; }
-.theme-row.empty .theme-text { color: #bbb; font-style: italic; text-decoration: none; }
-.theme-row.empty.disabled .theme-text { text-decoration: none; opacity: 0.7; }
+.theme-row.disabled .theme-body,
+.theme-row.disabled .theme-ruby { opacity: 0.55; }
+.theme-row.disabled .theme-body { text-decoration: line-through; }
 
 .theme-num {
   font-size: 12px; color: var(--gray);
   text-align: right; font-variant-numeric: tabular-nums;
 }
-.theme-text {
-  padding: 6px 10px;
+
+/* 本文＋ルビ の2段入力 */
+.theme-fields {
+  display: flex; flex-direction: column; gap: 3px;
+  min-width: 0;  /* gridセル内でinputが溢れないように */
+}
+.theme-body, .theme-ruby {
+  width: 100%;
   border: 2px solid transparent;
   border-radius: 8px;
-  font-size: 15px;
-  line-height: 2.1;
-  min-height: 1.5em;
   outline: none;
   background: var(--cream);
-  font-weight: 700;
-  /* ルビを含んでも編集中の caret 移動を安定させる */
-  white-space: pre-wrap;
-  word-break: break-word;
+  font-family: inherit;
+  box-sizing: border-box;
 }
-.theme-text:focus { border-color: var(--blue); background: var(--white); }
-/* 編集中もルビ（rt）はそのまま表示。base/rt どちらも編集可 */
-.theme-text ruby { ruby-position: over; }
-.theme-text rt { font-size: 0.5em; font-weight: 700; }
+.theme-body {
+  padding: 7px 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--black);
+}
+.theme-ruby {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #777;
+  background: #fff8e7;
+}
+.theme-body::placeholder { color: #bbb; font-weight: 500; font-style: italic; }
+.theme-ruby::placeholder { color: #c8b890; font-style: italic; }
+.theme-body:focus { border-color: var(--blue); background: var(--white); }
+.theme-ruby:focus { border-color: var(--blue); background: var(--white); color: var(--black); }
 .theme-row.custom .theme-num { color: var(--red); font-weight: 900; }
 
 .btn-icon {

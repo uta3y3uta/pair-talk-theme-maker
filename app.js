@@ -3,7 +3,6 @@ const STORAGE_KEY = 'pairTalkThemeMaker.v4';  // v4：デフォルトテーマ�
 const LEGACY_KEYS = ['pairTalkThemeMaker.v3', 'pairTalkThemeMaker.v2'];
 const TOTAL_SLOTS = 300;          // 250デフォルト + 50ユーザー
 const CUSTOM_START = 250;         // インデックス 250..299 がユーザー枠
-const PLACEHOLDER = '（クリックして入力）';
 
 let themes = [];
 // シャッフルバッグ：表示済みテキストを記録（全部出たら自動リセット）
@@ -44,6 +43,57 @@ function migrateRubyText(text) {
     '{$1|$2}'
   );
 }
+// 保存形式 "{漢字|かな}..." を「本文」と「ルビ仕様」の2つに分解
+// 例： "{好|す}きな{給食|きゅうしょく}のメニュー"
+//   → { body: "好きな給食のメニュー", ruby: "好=す，給食=きゅうしょく" }
+function splitRubyFields(combined) {
+  if (!combined) return { body: '', ruby: '' };
+  const pairs = [];
+  const body = combined.replace(/\{([^{}|]+)\|([^{}|]+)\}/g, (_, kanji, kana) => {
+    pairs.push(kanji + '=' + kana);
+    return kanji;
+  });
+  return { body, ruby: pairs.join('，') };
+}
+
+// 「本文」と「ルビ仕様」を再結合して "{漢字|かな}" 形式に戻す
+// ルビ仕様の区切り：「，」「,」 ペア区切り：「=」「:」「：」「＝」
+// 同じ漢字が複数回出る場合は，先頭の未マークアップ箇所から順に当てる
+function combineRubyFields(body, rubySpec) {
+  if (!body) return '';
+  if (!rubySpec) return body;
+  const pairs = String(rubySpec).split(/[,，、]/).map(s => s.trim()).filter(Boolean);
+  let result = body;
+  for (const p of pairs) {
+    const m = p.match(/^(.+?)\s*[=:：＝]\s*(.+)$/);
+    if (!m) continue;
+    const kanji = m[1].trim();
+    const kana = m[2].trim();
+    if (!kanji || !kana) continue;
+    const idx = findFirstUnwrapped(result, kanji);
+    if (idx >= 0) {
+      result = result.slice(0, idx) + '{' + kanji + '|' + kana + '}' + result.slice(idx + kanji.length);
+    }
+  }
+  return result;
+}
+function findFirstUnwrapped(text, needle) {
+  let from = 0;
+  while (from <= text.length - needle.length) {
+    const idx = text.indexOf(needle, from);
+    if (idx === -1) return -1;
+    // 既に {...} の中に入っているかチェック
+    let inside = false;
+    for (let j = 0; j < idx; j++) {
+      if (text[j] === '{') inside = true;
+      else if (text[j] === '}') inside = false;
+    }
+    if (!inside) return idx;
+    from = idx + 1;
+  }
+  return -1;
+}
+
 // contenteditable要素のDOMをたどり，{漢字|かな} 形式の文字列に直列化
 // ＝編集後の <ruby>...<rt>...</rt></ruby> を保存用の素朴な記法に戻す
 function serializeRubyDOM(el) {
@@ -173,7 +223,6 @@ function renderThemeList() {
     const cb = row.querySelector('.theme-enable');
     cb.checked = t.on;
     cb.addEventListener('change', () => {
-      // 空のままONにしようとしたら無効
       if (cb.checked && !themes[i].text) {
         cb.checked = false;
         return;
@@ -186,38 +235,35 @@ function renderThemeList() {
 
     row.querySelector('.theme-num').textContent = (i + 1).toString();
 
-    const txt = row.querySelector('.theme-text');
-    setRowText(txt, row, t.text);
+    const bodyInput = row.querySelector('.theme-body');
+    const rubyInput = row.querySelector('.theme-ruby');
+    const fields = splitRubyFields(t.text);
+    bodyInput.value = fields.body;
+    rubyInput.value = fields.ruby;
 
-    // focus 時：プレースホルダだけ消す。ルビは常に表示したまま編集できる。
-    txt.addEventListener('focus', () => {
-      if (!themes[i].text) {
-        txt.textContent = '';
+    // 本文 or ルビが書き換わったら結合して保存。空になったらOFFに。
+    const commit = () => {
+      const body = bodyInput.value.trim();
+      const ruby = rubyInput.value.trim();
+      const combined = combineRubyFields(body, ruby);
+      if (combined) {
+        themes[i].text = combined;
         row.classList.remove('empty');
-      }
-    });
-    // blur 時：DOM（編集後の<ruby>を含むHTML）を {漢字|かな} 形式に直列化して保存。
-    // ・ルビはそのまま保持される
-    // ・テキスト中に {漢字|かな} と書けば自動でルビ化されて再描画
-    txt.addEventListener('blur', () => {
-      let raw = serializeRubyDOM(txt);
-      raw = migrateRubyText(raw).trim();  // ペースト由来の<ruby>HTMLも吸収
-      if (raw) {
-        themes[i].text = raw;
-        txt.innerHTML = renderRuby(raw);  // ルビ表示で再描画
         saveThemes();
-        row.classList.remove('empty');
       } else {
         themes[i].text = '';
         themes[i].on = false;
         cb.checked = false;
         row.classList.add('disabled');
         row.classList.add('empty');
-        setRowText(txt, row, '');
         saveThemes();
         updateCount();
       }
-    });
+    };
+    bodyInput.addEventListener('change', commit);
+    rubyInput.addEventListener('change', commit);
+    // 入力中もリアルタイムでプレビュー側に反映したい場合は input でも commit
+    bodyInput.addEventListener('input', () => { row.classList.toggle('empty', !bodyInput.value.trim()); });
 
     row.querySelector('.theme-clear').addEventListener('click', () => {
       if (confirm('このテーマをクリアしますか？（スロット枠は残ります）')) {
@@ -230,16 +276,6 @@ function renderThemeList() {
     });
     list.appendChild(row);
   });
-}
-
-function setRowText(txtEl, row, text) {
-  if (text) {
-    txtEl.innerHTML = renderRuby(text);  // ルビ付き表示
-    row.classList.remove('empty');
-  } else {
-    txtEl.textContent = PLACEHOLDER;
-    row.classList.add('empty');
-  }
 }
 
 function updateCount() {
