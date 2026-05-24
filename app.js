@@ -464,9 +464,14 @@ function publishUrl() {
   themes.forEach((t, i) => {
     if (!t.on || !t.text) return;
     if (i >= CUSTOM_START) {
+      // カスタム枠：本文をそのまま埋め込む
       customList.push(t.text);
-    } else {
+    } else if (DEFAULT_THEMES[i] != null && t.text === DEFAULT_THEMES[i]) {
+      // デフォルト枠で未編集：bitmapのビットだけON
       defaultOnIdx.push(i);
+    } else {
+      // デフォルト枠だが編集済み：本文をURLに埋め込む（customs扱い）
+      customList.push(t.text);
     }
   });
 
