@@ -451,9 +451,19 @@ rt {
   color: var(--red);
   animation: pulse 0.6s ease-in-out infinite alternate;
 }
+/* 一時停止中：数字を点滅させて止まっていることを示す */
+.timer-row.paused .time-num,
+.timer-row.paused .time-colon {
+  animation: paused-blink 1.0s ease-in-out infinite alternate;
+  opacity: 0.55;
+}
 @keyframes pulse {
   from { transform: scale(1); }
   to   { transform: scale(1.06); }
+}
+@keyframes paused-blink {
+  from { opacity: 0.35; }
+  to   { opacity: 0.85; }
 }
 
 @media (max-width: 700px) {

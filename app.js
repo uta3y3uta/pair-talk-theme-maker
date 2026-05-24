@@ -12,6 +12,7 @@ let trialLastText = '';
 let playLastText = '';
 let countdownTimer = null;
 let remainingSec = 0;
+let pausedSec = 0;          // 一時停止中の残り秒数（0なら一時停止していない）
 let setMin = 1;   // デフォルト1分
 let setSec = 0;
 let countdownEffectActive = false;  // 3,2,1演出中フラグ
@@ -392,7 +393,8 @@ function bindPlayEvents() {
   document.querySelectorAll('.arrow').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (countdownTimer) return;
+      if (countdownTimer) return;     // 動作中は変更不可
+      if (pausedSec > 0) return;      // 一時停止中も変更不可（リセット後ならOK）
       const target = btn.dataset.target;
       const delta = parseInt(btn.dataset.delta, 10);
       if (target === 'min') {
@@ -417,10 +419,17 @@ function bindPlayEvents() {
     }
   });
 
-  document.getElementById('btnTimerStop').addEventListener('click', stopCountdown);
+  // ストップ：一時停止 ↔ 再開 のトグル
+  document.getElementById('btnTimerStop').addEventListener('click', () => {
+    if (countdownTimer) {
+      pauseCountdown();
+    } else if (pausedSec > 0) {
+      resumeCountdown();
+    }
+  });
+  // リセット：設定していたタイマー（setMin:setSec）に戻す
   document.getElementById('btnTimerReset').addEventListener('click', () => {
-    stopCountdown();
-    renderTimerDisplay();
+    resetCountdown();
   });
   document.getElementById('finishClose').addEventListener('click', () => {
     document.getElementById('finishOverlay').classList.add('hidden');
@@ -428,16 +437,37 @@ function bindPlayEvents() {
 }
 
 function renderTimerDisplay() {
-  const showMin = countdownTimer ? Math.floor(remainingSec / 60) : setMin;
-  const showSec = countdownTimer ? (remainingSec % 60)        : setSec;
+  let sec;
+  if (countdownTimer) {
+    sec = remainingSec;          // 動作中：残り
+  } else if (pausedSec > 0) {
+    sec = pausedSec;             // 一時停止中：止めた瞬間の残り
+  } else {
+    sec = setMin * 60 + setSec;  // それ以外：設定時間
+  }
+  const showMin = Math.floor(sec / 60);
+  const showSec = sec % 60;
   document.getElementById('timeMinDisplay').textContent = String(showMin).padStart(2, '0');
   document.getElementById('timeSecDisplay').textContent = String(showSec).padStart(2, '0');
 
   const row = document.getElementById('timerRow');
-  row.classList.remove('warn', 'danger');
+  row.classList.remove('warn', 'danger', 'paused');
   if (countdownTimer) {
     if (remainingSec <= 10) row.classList.add('danger');
     else if (remainingSec <= 30) row.classList.add('warn');
+  } else if (pausedSec > 0) {
+    row.classList.add('paused');
+  }
+  updateStopButtonLabel();
+}
+
+function updateStopButtonLabel() {
+  const btn = document.getElementById('btnTimerStop');
+  if (!btn) return;
+  if (pausedSec > 0 && !countdownTimer) {
+    btn.textContent = 'つづける';
+  } else {
+    btn.textContent = 'ストップ';
   }
 }
 
@@ -498,30 +528,70 @@ function playBeep(freq) {
   o.stop(t + 0.2);
 }
 
+// 新規スタート：設定時間（setMin:setSec）から開始
 function startCountdown() {
-  stopCountdown();
+  clearCountdownInterval();
+  pausedSec = 0;
   const total = setMin * 60 + setSec;
   if (total === 0) return;
   remainingSec = total;
   document.getElementById('timerBlock').classList.add('running');
-  countdownTimer = setInterval(() => {
-    remainingSec--;
-    renderTimerDisplay();
-    if (remainingSec <= 0) {
-      stopCountdown();
-      finishCountdown();
-    }
-  }, 1000);
+  countdownTimer = setInterval(tickCountdown, 1000);
   renderTimerDisplay();
 }
 
-function stopCountdown() {
+// 一時停止からの再開：残り秒数からカウント再開
+function resumeCountdown() {
+  if (pausedSec <= 0) return;
+  clearCountdownInterval();
+  remainingSec = pausedSec;
+  pausedSec = 0;
+  document.getElementById('timerBlock').classList.add('running');
+  countdownTimer = setInterval(tickCountdown, 1000);
+  renderTimerDisplay();
+}
+
+function tickCountdown() {
+  remainingSec--;
+  renderTimerDisplay();
+  if (remainingSec <= 0) {
+    clearCountdownInterval();
+    pausedSec = 0;
+    document.getElementById('timerBlock').classList.remove('running');
+    renderTimerDisplay();
+    finishCountdown();
+  }
+}
+
+// 一時停止：残り秒数を保持してカウントを止める
+function pauseCountdown() {
+  if (!countdownTimer) return;
+  pausedSec = remainingSec;
+  clearCountdownInterval();
+  document.getElementById('timerBlock').classList.remove('running');
+  renderTimerDisplay();
+}
+
+// リセット：設定時間に戻す
+function resetCountdown() {
+  clearCountdownInterval();
+  pausedSec = 0;
+  remainingSec = 0;
+  document.getElementById('timerBlock').classList.remove('running');
+  renderTimerDisplay();
+}
+
+// 内部用：intervalを止めるだけ（状態は触らない）
+function clearCountdownInterval() {
   if (countdownTimer) {
     clearInterval(countdownTimer);
     countdownTimer = null;
   }
-  document.getElementById('timerBlock').classList.remove('running');
-  renderTimerDisplay();
+}
+
+// 互換のため残す：完全停止＋リセット
+function stopCountdown() {
+  resetCountdown();
 }
 
 function finishCountdown() {
