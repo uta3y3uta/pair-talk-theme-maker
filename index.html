@@ -17,7 +17,6 @@
     <h1 class="app-title mario-title">
       <span class="c1">ペ</span><span class="c2">ア</span><span class="c3">ト</span><span class="c4">ー</span><span class="c1">ク</span><span class="c2">テ</span><span class="c3">ー</span><span class="c4">マ</span><span class="c1">メ</span><span class="c2">ー</span><span class="c3">カ</span><span class="c4">ー</span>
     </h1>
-    <p class="app-subtitle">ペアトークのテーマを決めよう！</p>
   </header>
 
   <div class="editor-layout">
@@ -37,9 +36,9 @@
       <div id="themeList" class="theme-list"></div>
     </section>
 
-    <!-- 右：お試しスロット -->
+    <!-- 右：プレビュースロット -->
     <section class="panel panel-right">
-      <h2>お試し</h2>
+      <h2>プレビュー</h2>
       <div class="slot-stage trial-stage">
         <div class="slot-frame">
           <div id="trialSlot" class="slot-window"></div>
@@ -56,7 +55,6 @@
             <button id="btnCopy" class="btn btn-mario-blue">コピー</button>
             <button id="btnOpen" class="btn btn-mario-blue">開く</button>
           </div>
-          <p class="hint">このURLを開くと，スロット＋タイマーだけのシンプル画面になります。</p>
         </div>
       </div>
     </section>
@@ -77,11 +75,12 @@
       <div id="playSlot" class="play-window">スタートを<ruby>押<rt>お</rt></ruby>してね</div>
     </div>
 
-    <!-- 3ボタン横並び -->
+    <!-- 4ボタン横並び -->
     <div class="action-row">
       <button id="playSlotBtn" class="btn btn-mario-red btn-mega">スタート</button>
       <button id="btnTimerStop" class="btn btn-mario-blue btn-small">ストップ</button>
       <button id="btnTimerReset" class="btn btn-mario-green btn-small">リセット</button>
+      <button id="btnTimerRestart" class="btn btn-mario-yellow btn-small">リスタート</button>
     </div>
 
     <!-- 横長タイマー -->
@@ -91,18 +90,21 @@
           <button class="arrow arrow-up" data-target="min" data-delta="1" aria-label="分を1増やす">▲</button>
           <div class="time-num" id="timeMinDisplay">01</div>
           <button class="arrow arrow-down" data-target="min" data-delta="-1" aria-label="分を1減らす">▼</button>
-          <div class="time-unit-label">分</div>
         </div>
         <div class="time-colon">:</div>
         <div class="time-unit">
           <button class="arrow arrow-up" data-target="sec" data-delta="10" aria-label="秒を10増やす">▲</button>
           <div class="time-num" id="timeSecDisplay">00</div>
           <button class="arrow arrow-down" data-target="sec" data-delta="-10" aria-label="秒を10減らす">▼</button>
-          <div class="time-unit-label">秒</div>
         </div>
       </div>
     </div>
   </main>
+
+  <!-- 3,2,1 カウントダウン演出 -->
+  <div id="countdownOverlay" class="countdown-overlay hidden">
+    <div id="countdownText" class="countdown-text">3</div>
+  </div>
 
   <div id="finishOverlay" class="finish-overlay hidden">
     <div class="finish-content">

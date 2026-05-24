@@ -325,14 +325,21 @@ function enterPlayMode(encoded) {
 function bindPlayEvents() {
   document.getElementById('playSlotBtn').addEventListener('click', () => {
     const btn = document.getElementById('playSlotBtn');
+    stopCountdown();
     playPrevIndex = spinSlot(
       document.getElementById('playSlot'),
       playPrevIndex,
       btn,
       () => {
-        startCountdown();
+        runStartCountdownEffect(() => startCountdown());
       }
     );
+  });
+
+  // リスタート：タイマーだけを開始（スロットは回さない）
+  document.getElementById('btnTimerRestart').addEventListener('click', () => {
+    stopCountdown();
+    runStartCountdownEffect(() => startCountdown());
   });
 
   document.querySelectorAll('.arrow').forEach(btn => {
@@ -385,6 +392,57 @@ function renderTimerDisplay() {
     if (remainingSec <= 10) row.classList.add('danger');
     else if (remainingSec <= 30) row.classList.add('warn');
   }
+}
+
+// ===== 3,2,1 → スタート！ 演出 =====
+function runStartCountdownEffect(onDone) {
+  const overlay = document.getElementById('countdownOverlay');
+  if (!overlay) { if (onDone) onDone(); return; }
+
+  const steps = ['3', '2', '1', 'スタート！'];
+  const stepMs = 800;
+  let i = 0;
+
+  overlay.classList.remove('hidden');
+
+  const show = () => {
+    const currentEl = document.getElementById('countdownText');
+    if (i >= steps.length) {
+      overlay.classList.add('hidden');
+      if (currentEl) currentEl.classList.remove('start');
+      if (onDone) onDone();
+      return;
+    }
+    const s = steps[i];
+    // アニメーション再再生のため新ノードに差し替え
+    const fresh = document.createElement('div');
+    fresh.id = 'countdownText';
+    fresh.className = 'countdown-text' + (s === 'スタート！' ? ' start' : '');
+    fresh.textContent = s;
+    if (currentEl && currentEl.parentNode) {
+      currentEl.parentNode.replaceChild(fresh, currentEl);
+    } else {
+      overlay.appendChild(fresh);
+    }
+    try { playBeep(s === 'スタート！' ? 1320 : 660); } catch (e) {}
+    i++;
+    setTimeout(show, stepMs);
+  };
+  show();
+}
+
+function playBeep(freq) {
+  const ctx = window._beepCtx || (window._beepCtx = new (window.AudioContext || window.webkitAudioContext)());
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.frequency.value = freq;
+  o.connect(g); g.connect(ctx.destination);
+  const t = ctx.currentTime;
+  g.gain.setValueAtTime(0.001, t);
+  g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+  o.start(t);
+  o.stop(t + 0.2);
 }
 
 function startCountdown() {
