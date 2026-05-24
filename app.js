@@ -413,11 +413,13 @@ function runStartCountdownEffect(onDone) {
 
   overlay.classList.remove('hidden');
 
+  const stepClasses = { '3': 'ct-3', '2': 'ct-2', '1': 'ct-1' };
+
   const show = () => {
     const currentEl = document.getElementById('countdownText');
     if (i >= steps.length) {
       overlay.classList.add('hidden');
-      if (currentEl) currentEl.classList.remove('start');
+      if (currentEl) currentEl.className = 'countdown-text';
       if (onDone) onDone();
       return;
     }
@@ -425,7 +427,8 @@ function runStartCountdownEffect(onDone) {
     // アニメーション再再生のため新ノードに差し替え
     const fresh = document.createElement('div');
     fresh.id = 'countdownText';
-    fresh.className = 'countdown-text' + (s === 'スタート！' ? ' start' : '');
+    const extra = (s === 'スタート！') ? ' start' : (' ' + (stepClasses[s] || ''));
+    fresh.className = 'countdown-text' + extra;
     fresh.textContent = s;
     if (currentEl && currentEl.parentNode) {
       currentEl.parentNode.replaceChild(fresh, currentEl);
