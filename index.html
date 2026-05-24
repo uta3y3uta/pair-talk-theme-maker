@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ペアトークテーマメーカー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Bungee&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +14,9 @@
 <!-- ===================== 設定モード ===================== -->
 <div id="editorView" class="view">
   <header class="app-header">
-    <h1 class="app-title">ペアトークテーマメーカー</h1>
+    <h1 class="app-title mario-title">
+      <span class="c1">ペ</span><span class="c2">ア</span><span class="c3">ト</span><span class="c4">ー</span><span class="c1">ク</span><span class="c2">テ</span><span class="c3">ー</span><span class="c4">マ</span><span class="c1">メ</span><span class="c2">ー</span><span class="c3">カ</span><span class="c4">ー</span>
+    </h1>
     <p class="app-subtitle">ペアトークのテーマを決めよう！</p>
   </header>
 
@@ -21,9 +26,9 @@
       <div class="panel-head">
         <h2>トークテーマ <span id="themeCount" class="count">0</span></h2>
         <div class="panel-actions">
-          <button id="btnAllOn" class="btn btn-tiny">全てON</button>
+          <button id="btnAllOn" class="btn btn-tiny btn-mario-green">全てON</button>
           <button id="btnAllOff" class="btn btn-tiny">全てOFF</button>
-          <button id="btnReset" class="btn btn-tiny btn-danger">初期化</button>
+          <button id="btnReset" class="btn btn-tiny btn-mario-red">初期化</button>
         </div>
       </div>
       <div class="theme-help">
@@ -39,17 +44,17 @@
         <div class="slot-frame">
           <div id="trialSlot" class="slot-window"></div>
         </div>
-        <button id="trialBtn" class="btn btn-primary btn-big">スタート</button>
+        <button id="trialBtn" class="btn btn-mario-red btn-big">スタート</button>
       </div>
 
       <div class="publish-area">
-        <button id="btnPublish" class="btn btn-accent btn-big">完成 → URL発行</button>
+        <button id="btnPublish" class="btn btn-mario-green btn-big">完成 → URL発行</button>
         <div id="publishResult" class="publish-result hidden">
           <label>発行URL</label>
           <div class="url-row">
             <input id="publishedUrl" type="text" readonly>
-            <button id="btnCopy" class="btn btn-secondary">コピー</button>
-            <button id="btnOpen" class="btn btn-secondary">開く</button>
+            <button id="btnCopy" class="btn btn-mario-blue">コピー</button>
+            <button id="btnOpen" class="btn btn-mario-blue">開く</button>
           </div>
           <p class="hint">このURLを開くと，スロット＋タイマーだけのシンプル画面になります。</p>
         </div>
@@ -61,21 +66,26 @@
 <!-- ===================== 本番（プレイ）モード ===================== -->
 <div id="playView" class="view hidden">
   <header class="play-header">
-    <h1 class="play-title">ペアトークテーマメーカー</h1>
+    <h1 class="play-title mario-title">
+      <span class="c1">ペ</span><span class="c2">ア</span><span class="c3">ト</span><span class="c4">ー</span><span class="c1">ク</span><span class="c2">テ</span><span class="c3">ー</span><span class="c4">マ</span><span class="c1">メ</span><span class="c2">ー</span><span class="c3">カ</span><span class="c4">ー</span>
+    </h1>
   </header>
 
   <main class="play-main">
     <!-- 大スロット -->
-    <div class="play-slot-wrap">
-      <div class="slot-frame play-frame">
-        <div id="playSlot" class="play-window">スタートを<ruby>押<rt>お</rt></ruby>してね</div>
-      </div>
-      <button id="playSlotBtn" class="btn btn-primary btn-mega">スタート</button>
+    <div class="slot-frame play-frame">
+      <div id="playSlot" class="play-window">スタートを<ruby>押<rt>お</rt></ruby>してね</div>
     </div>
 
-    <!-- タイマー（テーマのすぐ下に大きく） -->
+    <!-- 3ボタン横並び -->
+    <div class="action-row">
+      <button id="playSlotBtn" class="btn btn-mario-red btn-mega">スタート</button>
+      <button id="btnTimerStop" class="btn btn-mario-blue btn-small">ストップ</button>
+      <button id="btnTimerReset" class="btn btn-mario-green btn-small">リセット</button>
+    </div>
+
+    <!-- 横長タイマー -->
     <div id="timerBlock" class="timer-block" tabindex="0">
-      <div class="timer-label">のこり<ruby>時間<rt>じかん</rt></ruby></div>
       <div id="timerRow" class="timer-row">
         <div class="time-unit">
           <button class="arrow arrow-up" data-target="min" data-delta="1" aria-label="分を1増やす">▲</button>
@@ -91,17 +101,13 @@
           <div class="time-unit-label">秒</div>
         </div>
       </div>
-      <div class="timer-controls">
-        <button id="btnTimerStop" class="btn btn-secondary">ストップ</button>
-        <button id="btnTimerReset" class="btn">リセット</button>
-      </div>
     </div>
   </main>
 
   <div id="finishOverlay" class="finish-overlay hidden">
     <div class="finish-content">
       <div class="finish-mark">時間です！</div>
-      <button id="finishClose" class="btn btn-primary btn-big">OK</button>
+      <button id="finishClose" class="btn btn-mario-red btn-big">OK</button>
     </div>
   </div>
 </div>

@@ -1,18 +1,18 @@
-/* ===== カラーパレット（ペア活動図鑑100オマージュ） ===== */
+/* ===== カラーパレット（スーパーマリオワールド風） ===== */
 :root {
   --yellow: #FFE600;
   --yellow-dark: #E5CE00;
   --black: #1A1A1A;
-  --red: #E63946;
-  --red-dark: #B82C38;
-  --blue: #2A8FE0;
-  --blue-dark: #1F70B8;
-  --green: #4CAF50;
+  --red: #E52521;        /* マリオの赤 */
+  --red-dark: #B41611;
+  --blue: #1F8FFF;       /* マリオのオーバーオール青 */
+  --blue-dark: #1370CC;
+  --green: #43B047;      /* ヨッシーの緑 */
+  --green-dark: #2E8530;
+  --orange: #F89B2A;
   --white: #FFFFFF;
   --cream: #FFF8DC;
-  --line: #1A1A1A;
   --gray: #555;
-  --soft-gray: #f4efd8;
 }
 
 * { box-sizing: border-box; }
@@ -22,12 +22,11 @@ html, body {
   padding: 0;
   background: var(--yellow);
   color: var(--black);
-  font-family: "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
-  font-weight: 700;
+  font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+  font-weight: 800;
   -webkit-text-size-adjust: 100%;
 }
 
-/* ルビは大きめにして読みやすく */
 rt {
   font-size: 0.5em;
   font-weight: 600;
@@ -37,27 +36,45 @@ rt {
 .view { min-height: 100vh; }
 .hidden { display: none !important; }
 
-/* ===== 共通ヘッダー ===== */
+/* ===== マリオ風タイトル（多色＋黒フチ） ===== */
+.mario-title {
+  margin: 0;
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  font-weight: 900;
+  font-size: 36px;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-shadow:
+    -2px -2px 0 var(--black),
+     2px -2px 0 var(--black),
+    -2px  2px 0 var(--black),
+     2px  2px 0 var(--black),
+     0   -2px 0 var(--black),
+     0    2px 0 var(--black),
+    -2px  0   0 var(--black),
+     2px  0   0 var(--black),
+     4px  4px 0 rgba(0,0,0,0.25);
+}
+.mario-title .c1 { color: #E52521; }
+.mario-title .c2 { color: #1F8FFF; }
+.mario-title .c3 { color: #FFD93D; }
+.mario-title .c4 { color: #43B047; }
+
+/* ===== ヘッダー ===== */
 .app-header, .play-header {
   text-align: center;
-  padding: 24px 16px 12px;
-}
-.app-title, .play-title {
-  margin: 0;
-  font-size: 28px;
-  letter-spacing: 0.05em;
-  color: var(--black);
-  text-shadow: 2px 2px 0 var(--white);
+  padding: 18px 16px 10px;
 }
 .app-subtitle {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   font-size: 14px;
   color: var(--black);
   background: var(--white);
   display: inline-block;
   padding: 4px 14px;
   border-radius: 999px;
-  border: 2px solid var(--black);
+  border: 3px solid var(--black);
+  font-weight: 700;
 }
 
 /* ===== 設定エリア ===== */
@@ -75,12 +92,11 @@ rt {
 
 .panel {
   background: var(--white);
-  border: 3px solid var(--black);
-  border-radius: 18px;
+  border: 4px solid var(--black);
+  border-radius: 20px;
   padding: 18px;
   box-shadow: 6px 6px 0 var(--black);
 }
-
 .panel h2 {
   margin: 0 0 10px;
   font-size: 20px;
@@ -88,19 +104,15 @@ rt {
 }
 
 .panel-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: space-between;
+  gap: 8px; margin-bottom: 8px;
 }
 .panel-head h2 { margin: 0; }
 
 .count {
   display: inline-block;
-  background: var(--red);
-  color: var(--white);
+  background: var(--red); color: var(--white);
   padding: 2px 12px;
   border-radius: 999px;
   font-size: 14px;
@@ -108,33 +120,21 @@ rt {
   border: 2px solid var(--black);
 }
 
-.panel-actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
+.panel-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
-.theme-help {
-  font-size: 12px;
-  color: var(--gray);
-  margin-bottom: 8px;
-}
+.theme-help { font-size: 12px; color: var(--gray); margin-bottom: 8px; }
 .theme-help p { margin: 0; }
 
 /* ===== テーマリスト ===== */
 .theme-list {
-  max-height: 70vh;
-  overflow-y: auto;
-  border: 2px solid var(--black);
-  border-radius: 10px;
-  background: var(--white);
-  padding: 4px;
+  max-height: 70vh; overflow-y: auto;
+  border: 3px solid var(--black); border-radius: 12px;
+  background: var(--white); padding: 4px;
 }
 .theme-row {
   display: grid;
   grid-template-columns: 30px 44px 1fr 32px;
-  align-items: center;
-  gap: 8px;
+  align-items: center; gap: 8px;
   padding: 6px 6px;
   border-bottom: 1px dashed #cfcfcf;
 }
@@ -144,64 +144,50 @@ rt {
 .theme-row.empty.disabled .theme-text { text-decoration: none; opacity: 0.7; }
 
 .theme-num {
-  font-size: 12px;
-  color: var(--gray);
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+  font-size: 12px; color: var(--gray);
+  text-align: right; font-variant-numeric: tabular-nums;
 }
 .theme-text {
   padding: 6px 10px;
   border: 2px solid transparent;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 15px;
   line-height: 2.1;
   min-height: 1.5em;
   outline: none;
   background: var(--cream);
+  font-weight: 700;
 }
 .theme-text:focus { border-color: var(--blue); background: var(--white); }
-
-.theme-row.custom .theme-num {
-  color: var(--red);
-  font-weight: 900;
-}
+.theme-row.custom .theme-num { color: var(--red); font-weight: 900; }
 
 .btn-icon {
   width: 28px; height: 28px;
-  border: 2px solid var(--black);
-  border-radius: 50%;
-  background: var(--white);
-  color: var(--black);
-  font-size: 16px;
-  cursor: pointer;
-  line-height: 1;
-  font-weight: 900;
+  border: 2px solid var(--black); border-radius: 50%;
+  background: var(--white); color: var(--black);
+  font-size: 16px; cursor: pointer; line-height: 1; font-weight: 900;
+  font-family: inherit;
 }
 .btn-icon:hover { background: var(--red); color: var(--white); }
 
 /* ===== チェックボックス ===== */
 .checkbox {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  user-select: none;
-  font-size: 14px;
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer; user-select: none; font-size: 14px;
 }
 .checkbox input[type=checkbox] {
-  width: 20px; height: 20px;
+  width: 22px; height: 22px;
   accent-color: var(--red);
-  cursor: pointer;
-  flex-shrink: 0;
+  cursor: pointer; flex-shrink: 0;
 }
 
-/* ===== ボタン（コミック風） ===== */
+/* ===== ボタン（マリオ風コミックボタン） ===== */
 .btn {
   border: 3px solid var(--black);
   border-radius: 999px;
   padding: 8px 18px;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
   font-family: inherit;
   background: var(--white);
@@ -216,20 +202,22 @@ rt {
 }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.btn-primary { background: var(--red); color: var(--white); }
-.btn-secondary { background: var(--blue); color: var(--white); }
-.btn-accent { background: var(--green); color: var(--white); }
+.btn-mario-red    { background: var(--red);   color: var(--white); }
+.btn-mario-blue   { background: var(--blue);  color: var(--white); }
+.btn-mario-green  { background: var(--green); color: var(--white); }
+.btn-mario-yellow { background: var(--yellow); color: var(--black); }
+
 .btn-tiny {
-  padding: 4px 12px;
-  font-size: 12px;
-  box-shadow: 2px 2px 0 var(--black);
-  border-width: 2px;
+  padding: 4px 12px; font-size: 12px;
+  box-shadow: 2px 2px 0 var(--black); border-width: 2px;
 }
-.btn-danger { background: var(--red); color: var(--white); }
+.btn-small {
+  padding: 8px 18px; font-size: 14px;
+}
 .btn-big { padding: 12px 32px; font-size: 18px; }
 .btn-mega {
-  padding: 18px 56px;
-  font-size: 26px;
+  padding: 16px 48px;
+  font-size: 24px;
   border-width: 4px;
   box-shadow: 5px 5px 0 var(--black);
 }
@@ -237,52 +225,53 @@ rt {
 
 /* ===== お試しスロット（設定画面右） ===== */
 .slot-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 14px;
   padding: 18px;
   background: var(--yellow);
-  border: 2px dashed var(--black);
-  border-radius: 14px;
+  border: 3px dashed var(--black);
+  border-radius: 16px;
   margin-bottom: 16px;
 }
 .slot-frame {
-  width: 100%;
-  max-width: 520px;
+  width: 100%; max-width: 520px;
   border: 4px solid var(--black);
-  border-radius: 14px;
+  border-radius: 16px;
   background: var(--white);
-  overflow: hidden;
-  position: relative;
+  overflow: hidden; position: relative;
   box-shadow: 4px 4px 0 var(--black);
 }
 .slot-window {
   min-height: 130px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  line-height: 2.3;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; line-height: 2.3;
   text-align: center;
   padding: 18px 22px;
   word-break: break-word;
 }
+
+/* スピン中：ルビ非表示・１行強制・崩れ防止 */
 .slot-window.spinning {
-  animation: slot-blur 0.08s linear infinite;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  animation: slot-flash 0.08s linear infinite;
+  filter: blur(0.5px);
+  font-size: 18px;
+  line-height: 1.4;
 }
-@keyframes slot-blur {
-  0%   { transform: translateY(-20px); opacity: 0.3; }
-  50%  { transform: translateY(0);     opacity: 1; }
-  100% { transform: translateY(20px);  opacity: 0.3; }
+.slot-window.spinning ruby rt { display: none; }
+.slot-window.spinning ruby    { ruby-position: under; }
+@keyframes slot-flash {
+  0%   { opacity: 0.55; }
+  100% { opacity: 1; }
 }
 .slot-window.landed { animation: slot-pop 0.5s ease; }
 @keyframes slot-pop {
-  0%   { transform: scale(0.88); }
-  60%  { transform: scale(1.06); }
+  0%   { transform: scale(0.85); }
+  60%  { transform: scale(1.08); }
   100% { transform: scale(1); }
 }
-.trial-note { font-size: 12px; color: var(--gray); margin: 0; }
 
 /* ===== URL発行 ===== */
 .publish-area {
@@ -292,135 +281,120 @@ rt {
 }
 .publish-result { margin-top: 12px; text-align: left; }
 .publish-result label { font-size: 12px; color: var(--gray); }
-.url-row { display: flex; gap: 6px; margin-top: 4px; }
+.url-row { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
 .url-row input {
-  flex: 1;
-  padding: 8px 10px;
-  font-size: 12px;
-  border: 2px solid var(--black);
-  border-radius: 8px;
-  background: var(--white);
-  font-family: monospace;
+  flex: 1; min-width: 200px;
+  padding: 8px 10px; font-size: 12px;
+  border: 2px solid var(--black); border-radius: 8px;
+  background: var(--white); font-family: monospace;
 }
 .hint { font-size: 12px; color: var(--gray); margin: 8px 0 0; }
 
 /* ===================== プレイモード ===================== */
 .play-main {
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 12px 24px 40px;
-  max-width: 900px;
+  gap: 14px;
+  padding: 10px 20px 30px;
+  max-width: 980px;
   margin: 0 auto;
 }
 
-/* テーマカード（大） */
-.play-slot-wrap {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-}
+/* テーマ大カード */
 .play-frame {
-  width: 100%;
-  max-width: 860px;
-  border: 6px solid var(--black);
-  border-radius: 20px;
-  background: var(--white);
-  overflow: hidden;
+  max-width: 960px;
+  border-width: 6px;
+  border-radius: 22px;
   box-shadow: 8px 8px 0 var(--black);
 }
 .play-window {
-  min-height: 280px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 220px;
+  display: flex; align-items: center; justify-content: center;
   text-align: center;
-  padding: 28px 32px;
-  font-size: 38px;
+  padding: 24px 28px;
+  font-size: 34px;
   line-height: 2.4;
   word-break: break-word;
 }
-.play-window.spinning { animation: slot-blur 0.08s linear infinite; }
+.play-window.spinning {
+  white-space: nowrap; overflow: hidden;
+  animation: slot-flash 0.08s linear infinite;
+  filter: blur(0.6px);
+  font-size: 26px;
+  line-height: 1.4;
+}
+.play-window.spinning ruby rt { display: none; }
 .play-window.landed { animation: slot-pop 0.5s ease; }
 
 @media (max-width: 700px) {
-  .play-window { font-size: 26px; min-height: 180px; padding: 20px; line-height: 2.2; }
+  .play-window { font-size: 22px; min-height: 150px; padding: 16px; line-height: 2.2; }
+  .play-window.spinning { font-size: 18px; }
 }
 
-/* ===== 統合タイマー（プレイ画面メイン） ===== */
+/* 3ボタン横並び */
+.action-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ===== 横長タイマー ===== */
 .timer-block {
   width: 100%;
-  max-width: 720px;
+  max-width: 960px;
   background: var(--white);
   border: 4px solid var(--black);
-  border-radius: 20px;
-  padding: 18px 24px 22px;
+  border-radius: 18px;
+  padding: 10px 24px;
   box-shadow: 6px 6px 0 var(--black);
-  text-align: center;
   position: relative;
 }
-.timer-label {
-  font-size: 16px;
-  color: var(--black);
-  background: var(--yellow);
-  display: inline-block;
-  padding: 2px 14px;
-  border: 2px solid var(--black);
-  border-radius: 999px;
-  margin-bottom: 10px;
-}
 
-/* タイマー本体：分:秒 + 矢印 */
 .timer-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
 .time-unit {
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
   align-items: center;
   position: relative;
-  padding: 6px 4px;
+  padding: 2px 6px;
 }
 .time-num {
-  font-size: 88px;
+  font-size: 64px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
   color: var(--black);
   line-height: 1;
-  min-width: 130px;
+  min-width: 100px;
   text-align: center;
+  font-family: inherit;
 }
 .time-colon {
-  font-size: 72px;
+  font-size: 56px;
   font-weight: 900;
   color: var(--black);
-  padding-bottom: 6px;
+  padding: 0 4px 8px;
 }
 .arrow {
-  width: 56px;
-  height: 36px;
+  width: 50px; height: 28px;
   border: 3px solid var(--black);
   background: var(--yellow);
   border-radius: 8px;
   cursor: pointer;
-  font-size: 22px;
-  font-weight: 900;
+  font-size: 18px; font-weight: 900;
   line-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   color: var(--black);
   box-shadow: 2px 2px 0 var(--black);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s;
-  margin: 4px 0;
+  margin: 2px 0;
   padding: 0;
   font-family: inherit;
 }
@@ -428,21 +402,17 @@ rt {
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0 var(--black);
 }
-/* ホバー / フォーカス / running-disabled時のロジック */
 .timer-block:hover .arrow,
 .timer-block:focus-within .arrow,
 .timer-block.show-arrows .arrow {
-  opacity: 1;
-  pointer-events: auto;
+  opacity: 1; pointer-events: auto;
 }
 .timer-block.running .arrow {
-  opacity: 0 !important;
-  pointer-events: none !important;
+  opacity: 0 !important; pointer-events: none !important;
 }
 
 .time-unit-label {
-  font-size: 14px;
-  color: var(--gray);
+  font-size: 12px; color: var(--gray);
   margin-top: 2px;
 }
 
@@ -455,30 +425,21 @@ rt {
 }
 @keyframes pulse {
   from { transform: scale(1); }
-  to   { transform: scale(1.08); }
-}
-
-.timer-controls {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 12px;
+  to   { transform: scale(1.06); }
 }
 
 @media (max-width: 700px) {
-  .time-num { font-size: 60px; min-width: 90px; }
-  .time-colon { font-size: 48px; }
-  .arrow { width: 44px; height: 30px; font-size: 18px; }
+  .time-num { font-size: 48px; min-width: 70px; }
+  .time-colon { font-size: 40px; }
+  .arrow { width: 40px; height: 24px; font-size: 16px; }
+  .mario-title { font-size: 26px; }
 }
 
 /* ===== 終了オーバーレイ ===== */
 .finish-overlay {
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   background: rgba(0,0,0,0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   z-index: 100;
 }
 .finish-content {
@@ -499,4 +460,9 @@ rt {
   font-weight: 900;
   color: var(--red);
   margin-bottom: 18px;
+  text-shadow:
+    -1px -1px 0 var(--black),
+     1px -1px 0 var(--black),
+    -1px  1px 0 var(--black),
+     1px  1px 0 var(--black);
 }
