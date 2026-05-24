@@ -12,7 +12,7 @@
 <div id="editorView" class="view">
   <header class="app-header">
     <h1 class="app-title">ペアトークテーマメーカー</h1>
-    <p class="app-subtitle">スロットでペアトークのテーマを決めよう！</p>
+    <p class="app-subtitle">ペアトークのテーマを決めよう！</p>
   </header>
 
   <div class="editor-layout">
@@ -21,14 +21,13 @@
       <div class="panel-head">
         <h2>トークテーマ <span id="themeCount" class="count">0</span></h2>
         <div class="panel-actions">
-          <button id="btnAddTheme" class="btn btn-secondary">＋ テーマを追加</button>
           <button id="btnAllOn" class="btn btn-tiny">全てON</button>
           <button id="btnAllOff" class="btn btn-tiny">全てOFF</button>
           <button id="btnReset" class="btn btn-tiny btn-danger">初期化</button>
         </div>
       </div>
       <div class="theme-help">
-        <p>チェックを外すとスロットに登場しません。デフォルト250個＋オリジナル50個まで追加できます。</p>
+        <p>チェックを外すとスロットに登場しません。</p>
       </div>
       <div id="themeList" class="theme-list"></div>
     </section>
@@ -36,23 +35,15 @@
     <!-- 右：お試しスロット -->
     <section class="panel panel-right">
       <h2>お試し</h2>
-      <div class="trial-options">
-        <label class="checkbox">
-          <input type="checkbox" id="trialAllowDup" checked>
-          <span>重複アリ</span>
-        </label>
-      </div>
-
       <div class="slot-stage trial-stage">
         <div class="slot-frame">
           <div id="trialSlot" class="slot-window"></div>
         </div>
         <button id="trialBtn" class="btn btn-primary btn-big">スタート</button>
-        <p class="trial-note">本番ではこのスロットだけが大きく表示されます。</p>
       </div>
 
       <div class="publish-area">
-        <button id="btnPublish" class="btn btn-primary btn-big">完成 → URL発行</button>
+        <button id="btnPublish" class="btn btn-accent btn-big">完成 → URL発行</button>
         <div id="publishResult" class="publish-result hidden">
           <label>発行URL</label>
           <div class="url-row">
@@ -74,42 +65,35 @@
   </header>
 
   <main class="play-main">
-    <div class="play-slot-stage">
+    <!-- 大スロット -->
+    <div class="play-slot-wrap">
       <div class="slot-frame play-frame">
-        <div id="playSlot" class="slot-window play-window"></div>
+        <div id="playSlot" class="play-window">スタートを<ruby>押<rt>お</rt></ruby>してね</div>
       </div>
       <button id="playSlotBtn" class="btn btn-primary btn-mega">スタート</button>
     </div>
 
-    <div class="play-side">
-      <div class="timer-setting">
-        <label>トーク時間</label>
-        <div class="time-input-row">
-          <input id="timeMin" type="number" min="0" max="60" value="3">
-          <span>分</span>
-          <input id="timeSec" type="number" min="0" max="59" value="0">
-          <span>秒</span>
+    <!-- タイマー（テーマのすぐ下に大きく） -->
+    <div id="timerBlock" class="timer-block" tabindex="0">
+      <div class="timer-label">のこり<ruby>時間<rt>じかん</rt></ruby></div>
+      <div id="timerRow" class="timer-row">
+        <div class="time-unit">
+          <button class="arrow arrow-up" data-target="min" data-delta="1" aria-label="分を1増やす">▲</button>
+          <div class="time-num" id="timeMinDisplay">01</div>
+          <button class="arrow arrow-down" data-target="min" data-delta="-1" aria-label="分を1減らす">▼</button>
+          <div class="time-unit-label">分</div>
         </div>
-        <div class="quick-times">
-          <button class="btn btn-tiny quick-time" data-sec="30">30秒</button>
-          <button class="btn btn-tiny quick-time" data-sec="60">1分</button>
-          <button class="btn btn-tiny quick-time" data-sec="120">2分</button>
-          <button class="btn btn-tiny quick-time" data-sec="180">3分</button>
-          <button class="btn btn-tiny quick-time" data-sec="300">5分</button>
+        <div class="time-colon">:</div>
+        <div class="time-unit">
+          <button class="arrow arrow-up" data-target="sec" data-delta="10" aria-label="秒を10増やす">▲</button>
+          <div class="time-num" id="timeSecDisplay">00</div>
+          <button class="arrow arrow-down" data-target="sec" data-delta="-10" aria-label="秒を10減らす">▼</button>
+          <div class="time-unit-label">秒</div>
         </div>
-        <label class="checkbox dup-check">
-          <input type="checkbox" id="playAllowDup" checked>
-          <span>重複アリ</span>
-        </label>
       </div>
-
-      <div class="timer-display">
-        <div class="timer-label">のこり時間</div>
-        <div id="timerText" class="timer-text">03:00</div>
-        <div class="timer-controls">
-          <button id="btnTimerStop" class="btn btn-secondary">ストップ</button>
-          <button id="btnTimerReset" class="btn btn-secondary">リセット</button>
-        </div>
+      <div class="timer-controls">
+        <button id="btnTimerStop" class="btn btn-secondary">ストップ</button>
+        <button id="btnTimerReset" class="btn">リセット</button>
       </div>
     </div>
   </main>
@@ -130,7 +114,7 @@
     </label>
     <div class="theme-num"></div>
     <div class="theme-text" contenteditable="true" spellcheck="false"></div>
-    <button class="btn-icon theme-del" title="削除">×</button>
+    <button class="btn-icon theme-clear" title="クリア">×</button>
   </div>
 </template>
 
