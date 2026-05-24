@@ -507,12 +507,12 @@ rt {
   font-size: 320px;
   font-weight: 900;
   font-family: "M PLUS Rounded 1c", sans-serif;
-  color: rgba(255, 90, 200, 0.85);   /* ホットピンク半透明85% */
+  color: rgba(255, 90, 200, 0.25);   /* ホットピンク半透明25% */
   text-shadow:
-    -2px -2px 0 rgba(255,255,255,0.7),
-     2px -2px 0 rgba(255,255,255,0.7),
-    -2px  2px 0 rgba(255,255,255,0.7),
-     2px  2px 0 rgba(255,255,255,0.7);
+    -2px -2px 0 rgba(255,255,255,0.35),
+     2px -2px 0 rgba(255,255,255,0.35),
+    -2px  2px 0 rgba(255,255,255,0.35),
+     2px  2px 0 rgba(255,255,255,0.35);
   animation: countdown-pop 0.9s ease-out forwards;
   letter-spacing: 0.05em;
   line-height: 1;
@@ -520,16 +520,16 @@ rt {
 }
 .countdown-text.ct-3,
 .countdown-text.ct-2,
-.countdown-text.ct-1 { color: rgba(255, 90, 200, 0.85); }   /* ホットピンク 85% */
+.countdown-text.ct-1 { color: rgba(255, 90, 200, 0.25); }   /* ホットピンク 25% */
 .countdown-text.start {
   font-size: 220px;
-  color: rgba(255, 235, 70, 0.85);   /* 明るい黄色 半透明85% */
+  color: rgba(255, 235, 70, 0.35);   /* 明るい黄色 半透明35% */
   text-shadow:
-    -2px -2px 0 rgba(255,255,255,0.7),
-     2px -2px 0 rgba(255,255,255,0.7),
-    -2px  2px 0 rgba(255,255,255,0.7),
-     2px  2px 0 rgba(255,255,255,0.7),
-     6px  8px 0 rgba(255,90,200,0.45);
+    -2px -2px 0 rgba(255,255,255,0.4),
+     2px -2px 0 rgba(255,255,255,0.4),
+    -2px  2px 0 rgba(255,255,255,0.4),
+     2px  2px 0 rgba(255,255,255,0.4),
+     6px  8px 0 rgba(255,90,200,0.25);
   animation: countdown-start 0.9s ease-out forwards;
 }
 @keyframes countdown-pop {
